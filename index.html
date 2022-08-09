@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Inter:wght@100;200;300;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <script
+    src="https://code.jquery.com/jquery-3.6.0.min.js"
+    integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+    crossorigin="anonymous"></script>
+
+    <title>Random Decks</title>
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center mt-5 mb-5">
+                <button id="select-decks" class="btn btn-success" >Seleccionar mazos</button>
+            </div>
+
+            <div class="col-12">
+                <div class="d-flex justify-content-center">
+                    <div class="player-1-wrapper text-center">
+                        <h1>Jugador 1</h1>
+                        <ul class="list-decks player-1">
+                            <li class="raza show">
+                                <img src="assets/images/fondo.png" /> <p>&nbsp;</p>
+                            </li>
+                        </ul>
+                        <button class="btn btn-success select-deck-again" data-player="player-1">
+                            <i class="fa-solid fa-arrows-rotate"></i>
+                        </button>
+                    </div>
+                    <div class="align-self-center">
+                        <p id="versus">VS</p>
+                    </div>
+                    <div class="player-2-wrapper text-center">
+                        <h1>Jugador 2</h1>
+                        <ul class="list-decks player-2">
+                            <li class="raza show">
+                                <img src="assets/images/fondo.png" /> <p>&nbsp;</p>
+                            </li>
+                        </ul>
+                        <button class="btn btn-success select-deck-again" data-player="player-2">
+                            <i class="fa-solid fa-arrows-rotate"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</body>
+
+<script>
+    
+    const decks = [
+        {
+            raza: 'Héroe',
+            icon: 'heroe.png',
+            class: 'heroe'
+        },
+        {
+            raza: 'Caballero',
+            icon: 'caballero.png',
+            class: 'caballero'
+        },
+        {
+            raza: 'Defensor',
+            icon: 'defensor.png',
+            class: 'defensor'
+        },
+        {
+            raza: 'Sacerdote',
+            icon: 'sacerdote.png',
+            class: 'sacerdote'
+        },
+        {
+            raza: 'Olímpico',
+            icon: 'olimpico.png',
+            class: 'olimpico'
+        },
+        {
+            raza: 'Faraón',
+            icon: 'faraon.png',
+            class: 'faraon'
+        }
+    ];
+
+    const loadDecks = () => {
+        let listDeck = $('.list-decks');
+        decks.forEach((value, index) => {
+            listDeck.append('<li class="raza ' + value.class + '" ><img src="assets/images/razas/'+value.icon+'" /> <p>'+value.raza+'</p></li>');
+        });
+    };
+
+    const shuffleDecks = () => {
+        shuffle(decks);
+        shuffle(decks);
+        shuffle(decks);
+    };
+
+    let player1Deck = '';
+    let player2Deck = '';
+
+    const selectDeck = (player, excludeDeck = '', callback = null) => {
+
+        const length = decks.length - 1;
+        let deckFound = false;
+        let deckSelected = null;
+        while (!deckFound) {
+            let index = getRandomInt(length);
+            deckSelected = decks[index];
+            if (deckSelected.class != excludeDeck)
+                deckFound = true;
+        }
+
+        if (player == 'player-1')
+            player1Deck = deckSelected.class;
+        else
+            player2Deck = deckSelected.class;
+
+        setTimeout(() => {
+            shutdownReorder();
+            let listDeck = $('.list-decks.' + player);
+            listDeck.find('li').removeClass('show');
+            listDeck.find('li.' + deckSelected.class).addClass('show');
+
+            if (callback)
+                callback();
+        }, 3000);
+    };
+
+    let intervalFn = null;
+
+    const reorderDecks = (player) => {
+        let listDeck = $('.list-decks.' + player);
+        const decksLength = decks.length;
+        let index = 1;
+        intervalFn = setInterval(() => {
+            if (index == decksLength)
+                index = 1;
+            listDeck.find('li').removeClass('show');
+            listDeck.find('li.raza:eq('+index+')').addClass('show');
+            index++;
+        }, 50);
+    };
+
+    const shutdownReorder = () => {
+        clearInterval(intervalFn);
+    };
+
+    function shuffle(array) {
+        array.sort(() => Math.random() - 0.5);
+    }
+
+    function getRandomInt(max) {
+        return Math.floor(Math.random() * max);
+    }
+
+    $(() => {
+
+        shuffleDecks();
+        loadDecks();
+
+        let selectDecksToggle = false;
+
+        $("#select-decks").on('click', (e) => {
+            e.preventDefault();
+
+            if (selectDecksToggle)
+                return false;
+
+            selectDecksToggle = true;
+
+            $('.select-deck-again').removeClass('show');
+
+            let listDeck = $('.list-decks');
+            listDeck.find('li').removeClass('show');
+            listDeck.find('li:eq(0)').addClass('show');
+
+            player1Deck = '';
+            player2Deck = '';
+
+            setTimeout(() => {
+                reorderDecks('player-1', player2Deck);
+                selectDeck('player-1', '', () => {
+                    reorderDecks('player-2');
+                    selectDeck('player-2', player1Deck, () => {
+                        selectDecksToggle = false;
+                        $('.select-deck-again').addClass('show');
+                    });
+                });
+            }, 300);
+            
+        });
+
+        $(document).on('click', '.select-deck-again', function (e) {
+            if (!$(this).hasClass('show'))
+                return false;
+            
+            let player = $(this).data('player');
+            let oponentDeckSelected = player == 'player-1' ? player2Deck : player1Deck;
+            reorderDecks(player);
+            selectDeck(player, oponentDeckSelected);
+            
+        });
+
+    });
+
+</script>
+
+</html>
