@@ -92,6 +92,16 @@
             raza: 'Faraón',
             icon: 'faraon.png',
             class: 'faraon'
+        },
+        {
+            raza: 'Titán',
+            icon: 'titan.png',
+            class: 'titan'
+        },
+        {
+            raza: 'Eterno',
+            icon: 'eterno.png',
+            class: 'eterno'
         }
     ];
 
@@ -204,14 +214,16 @@
         });
 
         $(document).on('click', '.select-deck-again', function (e) {
-            if (!$(this).hasClass('show'))
+            if (!$(this).hasClass('show') || $(this).hasClass('clicked'))
                 return false;
             
             let player = $(this).data('player');
             let oponentDeckSelected = player == 'player-1' ? player2Deck : player1Deck;
             reorderDecks(player);
-            selectDeck(player, oponentDeckSelected);
-            
+            $(this).addClass('clicked');
+            selectDeck(player, oponentDeckSelected, () => {
+                $(this).removeClass('clicked');
+            });
         });
 
     });
